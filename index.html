@@ -85,8 +85,7 @@
           </ul>
         </aside>
       </section>
-      <section>
-        <img src="assets/elephpants.jpg" alt="The ElePHPants in the room" />
+      <section data-background="assets/elephpants.jpg" data-background-size="contain" data-credit="Larry Garfield">
       </section>
     </section>
     <section>
@@ -116,9 +115,7 @@
           $a[] = 'A';
           $a[] = 'B';
           print_r($a);
-
           unset($a[1]);
-
           $a[] = 'C';
           print_r($a);
         </code></pre>
@@ -134,16 +131,23 @@
               [2] => C
           )
         </code></pre>
-        <pre class="fragment"><code class="php" data-trim data-noescape>
-          for ($i = 0; $i < count($array); ++$i) {
-            print $a[$i];
-          }
-        </code></pre>
         <aside class="notes">
           <ul>
             <li>[] op means "make up int key based on counter"</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          for ($i = 0; $i < count($a); ++$i) {
+            print $a[$i];
+          }
+        </code></pre>
+        <p class="fragment">Notice: Undefined offset: 1 in /in/fQ0UB on line 13</p>
+        <aside class="notes">
+          <ul>
             <li>for loop is inherently unreliable</li>
-            <li>$a[$i] will break; AI is terrible.</li>
+            <li>$a[$i] will break; AI is threat.</li>
           </ul>
         </aside>
       </section>
