@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-	<title>TITLE HERE</title>
+	<title>Never* Use Arrays</title>
 
 	<link rel="stylesheet" href="css/reset.css" />
 	<link rel="stylesheet" href="css/reveal.css" />
@@ -27,9 +27,6 @@
 </head>
 <body class="skin-blue">
 <div class="reveal">
-  <header>
-    Title Here (Optional)
-  </header>
   <footer>
     <img class="logo" src="platform/logos/platformsh-logo-black.svg" alt="Platform.sh" />
     <span class="name">@Crell</span>
@@ -37,154 +34,268 @@
 	<div class="slides">
     <section class="title">
       <h1>Never* Use Arrays</h1>
-      <h2>Subtitle Here</h2>
     </section>
-		<section>Slide 1</section>
-		<section data-usecase="manual">This slide may get use-case omitted.</section>
-    <section>
-      <section>
-        <h2>Text</h2>
-      </section>
-      <section>
-        <h1>H1 text</h1>
-        <h2>H2 text</h2>
-        <h3>H3 text</h3>
-        <h4>H4 text</h4>
-        <p>Plain text</p>
-      </section>
-      <section>
-        <h2>Blockquotes</h2>
-        <aside class="quote">
-          <blockquote>Block quoted text goes here.  Block quoted text goes here.
-            Block quoted text <em> is emphasized</em>.  Block quoted text <strong>is strong</strong>.
-            Block quoted text goes here.</blockquote>
-          <cite>Author</cite>
-        </aside>
-        <p><q>This is a quotation.</q></p>
-      </section>
-      <section>
-        <h2>Lists</h2>
-        <ul>
-          <li>First point</li>
-          <li>Second point</li>
-          <li>Third point, with <a href="http://www.google.com/">A link</a></li>
-          <li>Fifth point, wait, what?</li>
-        </ul>
-        <p>A paragraph after a list</p>
-      </section>
-      <section>
-        <p>First line</p>
-        <p class="oversize">Second line</p>
-      </section>
-    </section>
-    <section>
-      <section>
-        <h2>Code</h2>
-      </section>
-      <section>
-        <p>Text with <code>inline code</code> goes here.</p>
-      </section>
-      <section>
-        <h2>A header</h2>
-        <pre class="stretch"><code class="php" data-trim data-noescape data-line-numbers="1, 3-4">
-          class Test {
-            public function experiment(int $a) : string {
-              return (string)$a;
-            }
-          }
 
-          function add_more_content(string $a, int $b, LongClassName\ClassName $c) : LongClassName\ClassName
-            $a[] = 1;
-            $a['stuff'] = 2;
-            $a[] = 3;
-            $a[] = 4;
-            $a[] = 5;
-            $a[] = 6;
-            $a[] = 6;
-            $a[] = 6;
-            $a[] = 6;
-            $a[] = 6;
-            $a[] = 6;
-            $a[] = 6;
-            $a[] = 6;
-            $a[] = 6;
-            $a[] = 6;
-            $a[] = 6;
-            $a[] = 6;
-          }
-        </code></pre>
-        <p>Stuff</p>
+    <section id="presenter">
+      <h2>Larry Garfield</h2>
+      <h2><a href="https://twitter.com/Crell">@Crell</a></h2>
+      <div class="layout-col vcentered">
+        <img src="assets/larry-olaf-hug.jpg" alt="Larry implements Huggable" style="width: 350px; margin: 0" />
+        <ul style="text-wrap: none">
+          <li>Director of DX, <a href="http://www.platform.sh/">Platform.sh</a></li>
+          <li style="margin-top: 1em;">PHP-FIG Core Committee</li>
+          <li style="margin-top: 1em;"><code>implements Huggable</code></li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <section>
+        <!-- misaligned, come back to this. -->
+        <p style="font-size: 4rem;">array(<img src="assets/php-logo.svg" style="height: 200px; text-align: center;" alt="PHP" data-credit="https://commons.wikimedia.org/wiki/File:PHP-logo.svg" />)</p>
+        <aside class="notes">
+          <ul>
+            <li>PHP loves arrays</li>
+            <li>The iconic PHP-ism</li>
+            <li>Used everywhere</li>
+          </ul>
+        </aside>
       </section>
       <section>
-        <h2>A header</h2>
+        <p class="oversize">They come with an <code>array</code> of problems.</p>
+        <div class="fragment"><img src="assets/picard-facepalm.jpg" class="meme" alt="The jokes will be that bad."></div>
+        <aside class="notes">
+          <ul>
+            <li>Yes, the jokes will be that bad.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <p class="oversize">They come with an <code>array</code> of problems.</p>
+        <ul>
+          <li>Inconsistent behavior</li>
+          <li class="fragment">No type safety</li>
+          <li class="fragment">No error handling</li>
+          <li class="fragment">Poor performance</li>
+          <li class="fragment">...PHP doesn't have them</li>
+        </ul>
+        <aside class="notes">
+          <ul>
+            <li>Need to address the elephant in the room...</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <img src="assets/elephpants.jpg" alt="The ElePHPants in the room" />
+      </section>
+    </section>
+    <section>
+      <section>
+        <h2>What is in array?</h2>
+        <ul>
+          <li>ordered sequence</li>
+          <li class="fragment">of values</li>
+          <li class="fragment">of the same type</li>
+          <li class="fragment">identified by their offset</li>
+        </ul>
+      </section>
+      <section>
+        <!-- picture of linear array -->
+      </section>
+      <section>
+        <h3>PHP has associative arrays</h3>
+        <ul>
+          <li>Arbitrary key-value index</li>
+          <li class="fragment">"Dictionary"/"Map"</li>
+          <li class="fragment">Numeric arrays via a hack</li>
+          <li class="fragment">No type guaratees (on value or key)</li>
+        </ul>
+      </section>
+      <section>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
-          function stuff(array $a) : void {
-            $a[] = 1;
+          $a[] = 'A';
+          $a[] = 'B';
+          print_r($a);
+
+          unset($a[1]);
+
+          $a[] = 'C';
+          print_r($a);
+        </code></pre>
+        <pre class="fragment"><code class="php" data-trim data-noescape>
+          Array
+          (
+              [0] => A
+              [1] => B
+          )
+          Array
+          (
+              [0] => A
+              [2] => C
+          )
+        </code></pre>
+        <pre class="fragment"><code class="php" data-trim data-noescape>
+          for ($i = 0; $i < count($array); ++$i) {
+            print $a[$i];
           }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>[] op means "make up int key based on counter"</li>
+            <li>for loop is inherently unreliable</li>
+            <li>$a[$i] will break; AI is terrible.</li>
+          </ul>
+        </aside>
+      </section>
+      <section data-transition="slide-in none-out">
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          protected function expandArguments(&$query, &$args) {
+              foreach ($args as $key => $data) {
+                // Handle expansion of arrays.
+                $key_name = str_replace('[]', '__', $key);
+                $new_keys = [];
+                foreach ($data as $i => $value) {
+                  $new_keys[$key_name . $i] = $value;
+                }
+
+                // Update the query with the new placeholders.
+                $query = str_replace($key, implode(', ', array_keys($new_keys)), $query);
+
+                // Update the args array with the new placeholders.
+                unset($args[$key]);
+                $args += $new_keys;
+              }
+        </code></pre>
+      </section>
+      <section data-transition="none">
+        <pre><code class="php" data-trim data-noescape data-line-numbers="6,7,11">
+          protected function expandArguments(&$query, &$args) {
+              foreach ($args as $key => $data) {
+                // Handle expansion of arrays.
+                $key_name = str_replace('[]', '__', $key);
+                $new_keys = [];
+                foreach ($data as $i => $value) {
+                  $new_keys[$key_name . $i] = $value;
+                }
+
+                // Update the query with the new placeholders.
+                $query = str_replace($key, implode(', ', array_keys($new_keys)), $query);
+
+                // Update the args array with the new placeholders.
+                unset($args[$key]);
+                $args += $new_keys;
+              }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>What happens if $data is string keys?</li>
+          </ul>
+        </aside>
+      </section>
+      <section data-transition="none-in slide-out">
+        <pre><code class="php" data-trim data-noescape data-line-numbers="6">
+          protected function expandArguments(&$query, &$args) {
+              foreach ($args as $key => $data) {
+                // Handle expansion of arrays.
+                $key_name = str_replace('[]', '__', $key);
+                $new_keys = [];
+                foreach (array_values($data) as $i => $value) {
+                  $new_keys[$key_name . $i] = $value;
+                }
+
+                // Update the query with the new placeholders.
+                $query = str_replace($key, implode(', ', array_keys($new_keys)), $query);
+
+                // Update the args array with the new placeholders.
+                unset($args[$key]);
+                $args += $new_keys;
+              }
         </code></pre>
       </section>
       <section>
-        <pre>
-          This is just some arbitrary
-          preformatted content.  Not to be used for code.
-          Is this ever needed?
-        </pre>
+        <h2>Drupageddon, 2014</h2>
+        <img src="assets/druplicon.svg" width="500px" alt="Drupal" />
+        <aside class="notes">
+          <ul>
+            <li>Worst security hole in Drupal history</li>
+            <li>Caused by lack of type safety in arrays</li>
+            <li>Also hole in Form API to be able to inject associative array</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <p class="oversize">PHP uses arrays in place of purpose-built data structures.</p>
+        <p class="oversize fragment">That is almost never the right answer.</p>
       </section>
     </section>
-    <section>
-      <section>
-        <h2>Layouts</h2>
-      </section>
-      <section>
-        <div class="layout-col vcentered equal-width">
-          <div>
-            <p>Line 1</p>
-            <p>Line 2</p>
-          </div>
-          <div>Div 2 is very long and will eat up space if you let it</div>
-          <div>Div 3</div>
-        </div>
-      </section>
-      <section>
-        <h2>Tables</h2>
-        <table>
-          <caption>Productivity in large systems</caption>
-          <tr><th>Num interactions</th> <th>Instructions per person-year</th></tr>
-          <tr><td>Very few</td> <td>10,000</td></tr>
-          <tr><td>Some</td> <td>5,000</td></tr>
-          <tr><td>Many</td> <td>1,500</td></tr>
-        </table>
-      </section>
+
+
+
+    <!--
+Arrays: All over PHP.
+Array of problems (yes the puns will be that bad), better options.
+
+Does PHP even have arrays?
+ElePHPant in the room.  (ElePHPant pic, person in suit)
+
+Array definition: ordered sequence of values identified by their offset, of the same type.
+Pic of linear array.
+
+PHP: Associative array; dictionary, map, etc.  Ordered key value map.
+Numeric arrays are a hack.  (Examples of where they break down, inc Drupageddon.)
+No type consistency.
+
+PHP uses arrays in place of purpose built data structures; PBDS are better almost always.
+
+See examples.
+
+Lists/sequences
+* OK for trivial cases, but want more guarantees most of the time.
+* ArrayObject
+* TypedArray - Forces a type
+* TypedIndexedArray - Forces indexed array only.
+* Immutability - ImmutableTypedIndexArray
+* Uniqueness - Sets
+
+Iteration
+* iterables
+* PSR-14, or maybe better example?
+* Genertors FTW
+* Array operations? Easy to replicate
+
+Lookup tables
+* Maps - Lookup object
+
+Typed data
+* Assoc array as anon struct.
+* Value objects
+* Immutability again
+* Drive design: $config params suck.
+* Refactor $config
+* Multiple returns, too
+
+Performance
+* Show benchmarks
+* Show tweet
+* Boom!
+
+Wither arrays?
+* Impl detail
+* Pass array literal to iterable.
+* callable tuple.
+* Compiled code.
+
+    -->
+
+
+    <section id="final">
+      <h2>Larry Garfield</h2>
+      <h2><a href="http://twitter.com/Crell">@Crell</a></h2>
+      <p>Director of Developer Experience <a href="http://www.platform.sh/">Platform.sh</a></p>
+      <p>Idea to Cloud Hosting</p>
+      <p>Stalk us at <a href="http://twitter.com/Platformsh">@PlatformSH</a></p>
     </section>
-    <section>
-      <section>
-        <h2>Chapter and title slides</h2>
-      </section>
-      <section class="divider-plain">
-        <h2>Title goes here</h2>
-      </section>
-      <section class="divider-side-blue">
-        <h2>Title goes here</h2>
-      </section>
-      <section class="divider-side-pink">
-        <h2>Title goes here</h2>
-      </section>
-    </section>
-    <section>
-      <section>
-        <h2>Images</h2>
-      </section>
-      <section>
-        <img src="assets/symfony-contributor-count.png" class="screenshot" alt="This is how to style a screenshot" />
-      </section>
-      <section>
-        <img src="assets/waterfall-meme.jpg" class="meme" alt="This is how to style a meme image" />
-      </section>
-      <section class="background-contain" data-background="assets/container-ship-noaa.jpg">
-        <p class="fullscreen-credit">(Credit: <a href="https://www.flickr.com/photos/usoceangov/5369581593">https://www.flickr.com/photos/usoceangov/5369581593</a>)</p>
-      </section>
-    </section>
-	</div>
+
 </div>
 
 <script src="js/reveal.js"></script>
