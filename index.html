@@ -24,6 +24,17 @@
 		document.getElementsByTagName( 'head' )[0].appendChild( link );
 	</script>
 
+  <style type="text/css">
+
+    p.challenge-q {
+      color: blue;
+    }
+
+    p.challenge-a {
+      color: green;
+    }
+  </style>
+
 </head>
 <body class="skin-blue">
 <div class="reveal">
@@ -234,6 +245,207 @@
         <p class="oversize">PHP uses arrays in place of purpose-built data structures.</p>
         <p class="oversize fragment">That is almost never the right answer.</p>
       </section>
+    </section>
+    <section>
+      <p class="oversize">So what's better?</p>
+      <p class="oversize fragment">Purpose-built data structures.</p>
+    </section>
+    <section>
+      <section>
+        <h2>Lists/Sequences</h2>
+        <aside class="notes">
+          <ul>
+            <li>OK for trivial cases, but break down quickly.</li>
+            <li>Just saw two problems.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3><code>\ArrayObject</code></h3>
+        <h3 class="fragment"><code>class TypedArray extends \ArrayObject</code></h3>
+        <aside class="notes">
+          <ul>
+            <li>"data structure" in PHP means class/object</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>A type-specific "array"</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class TypedArray extends \ArrayObject {
+              protected $type;
+
+              public static function forType(string $type) : self {
+                  $ret = new static();
+                  $ret->type = $type;
+                  return $ret;
+              }
+
+              private function __construct(...$args) {
+                  parent::__construct(...$args);
+              }
+
+              public function offsetSet($index, $newval) {
+                  if (! $newval instanceof $this->type) {
+                      throw new \TypeError(
+                        sprintf('Only values of type %s are supported', $this->type)
+                      );
+                  }
+                  parent::offsetSet($index, $newval);
+              }
+          }
+        </code></pre>
+      </section>
+      <section>
+        <h3>A type-specific "array"</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          $a = TypedArray::forType(Point::class);
+
+          $a[0] = new Point(2, 4);
+          $a[1] = new Point(6, 9);
+          $a['foobar'] = new Point(5, 2);
+
+          foreach ($a as $point) { ... }
+        </code></pre>
+        <pre class="fragment"><code class="php" data-trim data-noescape data-line-numbers>
+          // Throws \TypeError.
+          $a['bad'] = new Carrot();
+          $a['also_bad'] = 'a point';
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Certain in foreach() of what you have</li>
+            <li>What if we want to ensure sequential list?</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Force a sequence through the API</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class TypedSequence implements \IteratorAggregate, \Countable {
+              protected string $type;
+              protected array $values;
+
+              public static function forType(string $type) : self {...}
+              private function __construct() {}
+
+              public function getIterator() {
+                  return new ArrayIterator($this->values);
+              }
+
+              public function count() : int {
+                  return count($this->values);
+              }
+
+              public function add($newval) : self {
+                  if (! $newval instanceof $this->type) {
+                      throw new \TypeError(...);
+                  }
+                  $this->values = $newval;
+                  return $this;
+              }
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Countable: count()</li>
+            <li>IteratorAggregate: return thing to be iterated</li>
+            <li>Uses array internally: OK!</li>
+            <li>Can also add has(), other methods.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <p class="challenge-q"><q>But arrays pass by value, objects by reference!</q></p>
+        <p class="fragment challenge-a"><q>No, objects pass by value. You've been lied to.</q></p>
+        <p class="fragment challenge-q"><q>But they're modifiable!</q></p>
+        <p class="fragment challenge-a"><q>Their handle passes by value, not the object.</q></p>
+        <p class="fragment challenge-q"><q>OMGWTFBBQ?</q></p>
+        <p class="fragment challenge-a"><q>Sigh.</q></p>
+        <aside class="notes">
+          <ul>
+            <li>Objects pass in a way that makes them modifiable</li>
+            <li>Bad.  But we can fix that ourselves.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Can't touch this</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class ImmutableTypedSequence implements IteratorAggregate, Countable {
+              // Same as TypedSequence, but...
+
+              public function add($newval) : self {
+                  if (!$newval instanceof $this->type) { throw new \TypeError(...);}
+
+                  $new = clone($this);
+                  $values = array_merge($this->values, [$newval]);
+                  $new->values = $values;
+                  return $new;
+              }
+
+              public function remove($val) : self {
+                  if ($key = array_search($val, $this->values, true)) {
+                      $values = $this->values;
+                      unset($values[$key]);
+                      $new = clone($this);
+                      $new->values = array_values($values);
+                      return $new;
+                  }
+                  return $this;
+              }
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>array_values() to reset index.</li>
+            <li>Add whatever lookup methods you want/need.</li>
+            <li>Copy on write</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h2>Type-specific</h2>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class PointSequence implements IteratorAggregate, Countable {
+              // Same as before, but...
+
+              public function add(Point $newval) : self {
+                  $new = clone($this);
+                  $values = array_merge($this->values, [$newval]);
+                  $new->values = $values;
+                  return $new;
+              }
+
+              public function remove(Point $val) : self {
+                  if ($key = array_search($val, $this->values, true)) {
+                      $values = $this->values;
+                      unset($values[$key]);
+                      $new = clone($this);
+                      $new->values = array_values($values);
+                      return $new;
+                  }
+                  return $this;
+              }
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Type hints instead of manual checks</li>
+            <li>Easy enough to make for any type, including primitives</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>What have we gained?</h3>
+        <ul>
+          <li class="fragment">Type-safe lists</li>
+          <li class="fragment">Sequence-guaranteed lists</li>
+          <li class="fragment">Immutability guarantee</li>
+          <li class="fragment">Self-documenting API</li>
+        </ul>
+      </section>
+
     </section>
 
 
