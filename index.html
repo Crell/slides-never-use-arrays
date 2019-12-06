@@ -537,8 +537,164 @@
         </aside>
       </section>
     </section>
+    <section>
+      <section>
+        <h2>Passable lists</h2>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 650px">
+          <p class="oversize">Can't type hint on <code>array</code> anymore</p>
+          <h2 class="oversize fragment">:-(</h2>
+        </div>
+        <aside class="notes">
+          <ul>
+            <li>Two use cases to consider</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 650px">
+          <h3>Do you care about the type of the objects?</h3>
+          <p class="fragment oversize"><code>FooList implements \Traversable</code></p>
+        </div>
+        <aside class="notes">
+          <ul>
+            <li>Make it a real typed collection</li>
+            <li>It's now a domain object in your API</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 650px">
+          <h3>Do you just want to be able to <code>foreach()</code></h3>
+          <p class="fragment oversize"><code>iterable</code></p>
+        </div>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 650px">
+          <p class=""><code>iterable :: array|\Traversable</code></p>
+          <p class=" fragment"><code>\Traversable :: \Iterator|\IteratorAggregate</code></p>
+          <p class=" fragment"><code>\Generator implements \Iterator</code></p>
+        </div>
+      </section>
+      <section>
+        <h3>Generators</h3>
+        <ul>
+          <li class="fragment">Lazy stream of values</li>
+          <li class="fragment">Lazy value creation</li>
+          <li class="fragment">Structure flattening</li>
+          <li class="fragment">Simpler code</li>
+        </ul>
+      </section>
+      <section>
+        <h3>A PSR-14 example</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+        interface ListenerProviderInterface {
+            /**
+             * @param object $event
+             *   An event for which to return the relevant listeners.
+             * @return iterable[callable]
+             *   An iterable (array, iterator, or generator) of callables.  Each
+             *   callable MUST be type-compatible with $event.
+             */
+            public function getListenersForEvent(object $event) : iterable;
+        }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Why iterable? All we'll do is iterate.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>A PSR-14 example</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class Dispatcher implements DispatcherInterface {
+            // ...
+
+            public function dispatch(object $event) {
+
+              foreach ($this->provider->getListenersForEvent($event) as $listener) {
+                if ($event instanceof StoppableEventInterface
+                    && $event->isPropagationStopped()) {
+                  break;
+                }
+                $listener($event);
+              }
+
+              return $event;
+            }
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>All we care about is foreachable() set of callables</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Tukio (PSR-14 reference implementation)</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class CallbackProvider implements ListenerProviderInterface {
+              // ...
+
+              public function getListenersForEvent(object $event): iterable {
+                  if (!$event instanceof CallbackEventInterface) {
+                      return [];
+                  }
+                  $subject = $event->getSubject();
+
+                  foreach ($this->callbacks as $type => $callbacks) {
+                      if ($event instanceof $type) {
+                          foreach ($callbacks as $callback) {
+                              if (method_exists($subject, $callback)) {
+                                  yield [$subject, $callback];
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Arbitrarily complex logic, easily flattened by a generator</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Trivial to concatenate</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class AggregateProvider implements ListenerProviderInterface {
+              /** @var array */
+              protected $providers = [];
+
+              public function getListenersForEvent(object $event): iterable {
+                  /** @var ListenerProviderInterface $provider */
+                  foreach ($this->providers as $provider) {
+                      yield from $provider->getListenersForEvent($event);
+                  }
+              }
+              // ...
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Don't know or care if nested providers are lazy</li>
+          </ul>
+        </aside>
+      </section>
+    </section>
 
 
+
+
+
+    <section>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+
+        </code></pre>
+    </section>
 
 
     <!--
