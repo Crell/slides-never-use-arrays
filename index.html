@@ -678,9 +678,174 @@
               // ...
           }
         </code></pre>
+        <p>From <a href="https://github.com/php-fig/event-dispatcher-util">fig/event-dispatcher-util</a></p>
         <aside class="notes">
           <ul>
             <li>Don't know or care if nested providers are lazy</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 600px">
+          <h3><q>But what about <code>array_*</code> methods?</q></h3>
+          <p class="oversize fragment"><q>What about them?</q></p>
+        </div>
+      </section>
+      <section>
+        <h3><code>array_*</code> methods</h3>
+        <ul>
+          <li class="fragment">Internal implementation detail</li>
+          <li class="fragment">Rarely used</li>
+          <li class="fragment">Easy to reimplement</li>
+        </ul>
+      </section>
+      <section>
+        <h3>The big 3</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          function iterable_map(iterable $list, callable $operation) : iterable {
+            foreach ($list as $k => $v) {
+              yield $operation($k, $v);
+            }
+          }
+
+          function iterable_filter(iterable $list, callable $filter) : iterable {
+            foreach ($list as $k => $v) {
+              if ($filter($v)) {
+                yield $k => $v;
+              }
+            }
+          }
+
+          function iterable_reduce(iterable $list, callable $reducer, $acc) {
+            foreach ($list as $v) {
+              $acc = $reducer($acc, $v);
+            }
+            return $acc;
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Rare that I need any others</li>
+            <li>Not unheard of, but rare</li>
+            <li>Most others can be reimplemented to iterables, too.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Collection objects</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class Collection implements \IteratorAggregate {
+              protected $valuesGenerator;
+
+              protected function __construct(){}
+
+              public static function fromIterable(iterable $values = null) {
+                  $values ??= [];
+                  return static::fromGenerator(function () use ($values) {
+                      yield from $values;
+                  });
+              }
+
+              public static function fromGenerator(callable $callback) : self {
+                  $new = new static();
+                  $new->valuesGenerator = $callback;
+                  return $new;
+              }
+
+              public function getIterator() : iterable {
+                  return ($this->valuesGenerator)();
+              }
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Completely generator-based collection</li>
+            <li>Values converted to generator</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Collection objects</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class Collection implements \IteratorAggregate {
+              // ...
+              public function append(iterable ...$collections) : self {
+                  return static::fromGenerator(function() use ($collections) {
+                      yield from ($this->valuesGenerator)();
+                      foreach ($collections as $col) {
+                          yield from $col;
+                      }
+                  });
+              }
+
+              public function add(...$items) : self {
+                  return $this->append($items);
+              }
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Adding values is just concatenating lists/generators</li>
+            <li>add() is append().  One is a special case of many.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Collection objects</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class Collection implements \IteratorAggregate {
+              // ...
+              public function map(callable $fn) : self {
+                  return static::fromGenerator(function () use ($fn) {
+                      foreach (($this->valuesGenerator)() as $key => $val) {
+                          yield $key => $fn($val);
+                      }
+                  });
+              }
+
+              public function toArray() : array {
+                  return iterator_to_array((function() {
+                      foreach ($this as $value) {
+                          yield $value;
+                      }
+                  })());
+              }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>map() gives new collection that will filter when iterated</li>
+            <li>toArray() can't just iterator_to_array() as keys will collide.</li>
+            <li>This streams values out individually, ignores keys.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Collection objects</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          $c = Collection::fromIterable([1, 2, 3]);
+
+          $c = $c->add(4, 5, 6);
+          $c = $c->map(fn($v) => $v * 10);
+
+          print_r($c->toArray());
+        </code></pre>
+        <pre class="fragment"><code class="php" data-trim data-noescape data-line-numbers>
+          Array
+          (
+              [0] => 10
+              [1] => 20
+              [2] => 30
+              [3] => 40
+              [4] => 50
+              [5] => 60
+          )
+        </code></pre>
+        <p class="fragment">Can you add map/filter to OrderedSet?</p>
+        <aside class="notes">
+          <ul>
+            <li><60 lines, including whitespace</li>
+            <li>More robust libs exist, but easy to implement as-needed</li>
+            <li>Make your own ad-hoc on collection classes</li>
           </ul>
         </aside>
       </section>
