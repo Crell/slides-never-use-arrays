@@ -816,6 +816,7 @@
             <li>map() gives new collection that will filter when iterated</li>
             <li>toArray() can't just iterator_to_array() as keys will collide.</li>
             <li>This streams values out individually, ignores keys.</li>
+            <li>filter()/reduce() left as exercise for the reader.</li>
           </ul>
         </aside>
       </section>
@@ -850,7 +851,145 @@
         </aside>
       </section>
     </section>
+    <section>
+      <h3><q>But what about associative arrays?</q></h3>
+      <aside class="notes">
+        <ul>
+          <li>Two kinds: Lookup tables, anonymous structs</li>
+        </ul>
+      </aside>
+    </section>
+    <section>
+      <section>
+        <h2>Lookup tables</h2>
+        <ul>
+          <li class="fragment">Map from arbitrary value to arbitrary value</li>
+          <li class="fragment">Keys are int or string only</li>
+          <li class="fragment">Good for user/config-supplied keys</li>
+        </ul>
+      </section>
+      <section>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          $builders = [];
+          foreach (getRegisteredBuilderPlugins() as $builder) {
+              $builders[$builder->format()] = $builder;
+          }
+          // ...
 
+          $output = $lookup[$request->getHeaderLine('Accept')]->buildOutput($stuff);
+        </code></pre>
+        <ul class="fragment" style="margin-top: 1em;">
+          <li>Error handling?</li>
+          <li>Missing keys?</li>
+          <li>Type safety?</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Build your own lookup utility</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class Lookup implements ArrayAccess {
+              protected $type;
+              protected $values;
+              protected $default;
+
+              public static function forType(string $type, $default = null) : self {
+                  // Like we saw before, but also save $default.
+              }
+
+              public function offsetSet($offset, $value) {
+                  if (! is_string($offset)) { throw new \TypeError(...); }
+                  if (! $value instanceof $this->type) { throw new \TypeError(...);}
+
+                  $this->values[$offset] = $value;
+              }
+
+              public function offsetGet($offset) {
+                  return $this->values[$offset] ?? $this->default;
+              }
+
+              public function offsetExists($offset) { ... }
+              public function offsetUnset($offset) { ... }
+          }
+        </code></pre>
+      </section>
+      <section>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          $builders = Lookup::forType(OutputBuilder::class, new DefaultBuilder());
+
+          foreach (getRegisteredBuilderPlugins() as $builder) {
+              $builders[$builder->format()] = $builder;
+          }
+          // ...
+
+          $output = $lookup[$request->getHeaderLine('Accept')]->buildOutput($stuff);
+        </code></pre>
+      </section>
+      <section>
+        <h3>Or without <code>ArrayAccess</code></h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class Lookup {
+              protected $type;
+              protected $values;
+
+              public static function forType(string $type) : self {
+                  // As before.
+              }
+
+              public function add(string $key, $value) {
+                  if (! $value instanceof $this->type) { throw new \TypeError(...);}
+
+                  $this->values[$key] = $value;
+              }
+
+              public function lookup(string $key, $default = null) {
+                  return $this->values[$offset] ?? $default;
+              }
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>ArrayAccess is slower than method call</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Or a purpose-built service</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class BuilderMap {
+              protected $defaultFmt;
+              protected $provider;
+              protected $builders = [];
+
+              public function __construct(BuilderProvider $p, $defaultFmt = '') {...}
+
+              protected function buildLookup() {
+                  foreach (getRegisteredBuilderPlugins() as $builder) {
+                      $this->builders[$builder->format()] = $builder;
+                  }
+              }
+
+              public function lookup(string $key) {
+                  if (!$this->builders) $this->buildLookup();
+                  return $this->values[$key] ?? $this->values[$this->defaultFmt];
+              }
+          }
+        </code></pre>
+        <pre class="fragment"><code class="php" data-trim data-noescape data-line-numbers>
+          $builder = $builders->lookup($req->getHeaderLine('Accept'));
+          $output = ->buildOutput($stuff);
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>ArrayAccess is slower than method call</li>
+            <li>Configure this in your container</li>
+            <li>Type checked throughout, so can't go wrong.</li>
+          </ul>
+        </aside>
+      </section>
+    </section>
+    <section>
+      <h2>Anonymous structs</h2>
+    </section>
 
 
 
