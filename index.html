@@ -1159,75 +1159,124 @@
           </ul>
         </aside>
       </section>
+      <section>
+        <p class="oversize"><q>But aren't public properties eeeevil?</q></p>
+        <ul>
+          <li class="fragment">Private object => Public properties</li>
+          <li class="fragment">Public API => protected properties with meaningful methods</li>
+        </ul>
+      </section>
     </section>
-
-
-
-
-
     <section>
+      <section>
+        <h2><q>But aren't objects big and slow</q></h2>
+        <aside class="notes">
+          <ul>
+            <li>Old urban legend in PHP</li>
+            <li>Maybe true in PHP 4?</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Benchmarks, yo</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
+          const TEST_SIZE = 1000000;
 
+          $list = [];
+          $start = $stop = 0;
+          $start = microtime(true);
+
+          for ($i = 0; $i < TEST_SIZE; ++$i) {
+            $list[$i] = [
+              'a' => random_int(1, 500),
+              'b' => base64_encode(random_bytes(16)),
+            ];
+          }
+
+          ksort($list);
+
+          usort($list, function($first, $second) {
+            return [$first['a'], $first['b']] <=> [$second['a'], $second['b']];
+          });
+
+          $stop = microtime(true);
+          $memory = memory_get_peak_usage();
+          printf("Runtime: %s\nMemory: %s\n", $stop - $start, $memory);
         </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Same thing for stdClass, public props, private props with methods, anon class</li>
+            <li>Multiple runs, averaged, etc.</li>
+            <li>Goal is to access values a zillion times</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Results</h3>
+        <table>
+          <thead>
+            <tr><th scope="col">Technique</th> <th scope="col">Runtime (s)</th> <th scope="col">Memory (bytes)</th></tr>
+          </thead>
+          <tbody>
+            <tr class="fragment"> <th scope="row">Associative array</th> <td>9.4311 (n/a)</td> <td>541,450,384 (n/a)</td></tr>
+            <tr class="fragment"> <th scope="row">stdClass</th> <td>11.2173 (+18.94%)</td> <td>589,831,120 (+8.94%)</td></tr>
+            <tr class="fragment"> <th scope="row">Public properties</th> <td>8.2172 (-12.87%)</td> <td>253,831,584 (-53.12%)</td></tr>
+            <tr class="fragment"> <th scope="row">Private properties</th> <td>11.0881 (+17.57%)</td> <td>253,833,000 (-53.12%)</td></tr>
+            <tr class="fragment"> <th scope="row">Anonymous class</th> <td>8.1095 (-14.07%)</td> <td>253,832,368 (-53.12%)</td></tr>
+          </tbody>
+        </table>
+        <p class="fragment"><img src="assets/mind-blown.gif" alt="Mind blown" width="400px" style="margin-top: 1em" /></p>
+      </section>
+      <section>
+        <div style="display: flex; align-items: center; justify-content: center;">
+          <blockquote class="twitter-tweet" data-lang="en" data-dnt="true">
+            <p lang="en" dir="ltr">Replaced all object-like arrays with classes where they are used thousands of times.<br><br>Memory usage reduced by 58% (from 12Gb to 5Gb).<br><br>Please, read this article by <a href="https://twitter.com/Crell?ref_src=twsrc%5Etfw">@Crell</a>
+              <a href="https://t.co/cHb3agX18R">https://t.co/cHb3agX18R</a> to understand why you have to prefer classes. <a href="https://t.co/ipuqmdpnWB">pic.twitter.com/ipuqmdpnWB</a></p>&mdash; Maks Rafalko (@maks_rafalko) <a href="https://twitter.com/maks_rafalko/status/1141822788124196867?ref_src=twsrc%5Etfw">June 20, 2019</a>
+          </blockquote>
+          <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+        </div>
+      </section>
     </section>
+    <section>
+      <p class="oversize"><q>So can you <em>ever</em>em> use an array?</q></p>
+      <ul>
+        <li class="fragment">Internal implementation detail</li>
+        <li class="fragment">Array literal for iterable</li>
+        <li class="fragment">Callables (<code>[$obj, 'method']</code>)</li>
+        <li class="fragment">Compiled code</li>
+      </ul>
+    </section>
+    <section>
+      <pre><code class="php" data-trim data-noescape data-line-numbers>
+        class CompiledItems {
 
+            protected $items = [
+                'thing1' => [
+                    'color' => 'blue',
+                    'size' => 5,
+                ],
+                'thing2' => [
+                    'color' => 'green',
+                    'size' => 7,
+                ],
+            ];
 
-    <!--
-Arrays: All over PHP.
-Array of problems (yes the puns will be that bad), better options.
-
-Does PHP even have arrays?
-ElePHPant in the room.  (ElePHPant pic, person in suit)
-
-Array definition: ordered sequence of values identified by their offset, of the same type.
-Pic of linear array.
-
-PHP: Associative array; dictionary, map, etc.  Ordered key value map.
-Numeric arrays are a hack.  (Examples of where they break down, inc Drupageddon.)
-No type consistency.
-
-PHP uses arrays in place of purpose built data structures; PBDS are better almost always.
-
-See examples.
-
-Lists/sequences
-* OK for trivial cases, but want more guarantees most of the time.
-* ArrayObject
-* TypedArray - Forces a type
-* TypedIndexedArray - Forces indexed array only.
-* Immutability - ImmutableTypedIndexArray
-* Uniqueness - Sets
-
-Iteration
-* iterables
-* PSR-14, or maybe better example?
-* Genertors FTW
-* Array operations? Easy to replicate
-
-Lookup tables
-* Maps - Lookup object
-
-Typed data
-* Assoc array as anon struct.
-* Value objects
-* Immutability again
-* Drive design: $config params suck.
-* Refactor $config
-* Multiple returns, too
-
-Performance
-* Show benchmarks
-* Show tweet
-* Boom!
-
-Wither arrays?
-* Impl detail
-* Pass array literal to iterable.
-* callable tuple.
-* Compiled code.
-
-    -->
-
+            public function getItem(string $name) {
+                return new Item($this->items[$name]);
+            }
+        }
+      </code></pre>
+      <aside class="notes">
+        <ul>
+          <li>Embedded into shared memory, not process memory</li>
+          <li>More efficient if you just lookup rather than copy into memory</li>
+          <li>Use objects to build the data that will be serialized that way</li>
+        </ul>
+      </aside>
+    </section>
+    <section>
+      <h3>So really, Never* Use Arrays</h3>
+    </section>
 
     <section id="final">
       <h2>Larry Garfield</h2>
