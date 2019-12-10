@@ -1238,7 +1238,7 @@
       </section>
     </section>
     <section>
-      <p class="oversize"><q>So can you <em>ever</em>em> use an array?</q></p>
+      <p class="oversize"><q>So can you <em>ever</em> use an array?</q></p>
       <ul>
         <li class="fragment">Internal implementation detail</li>
         <li class="fragment">Array literal for iterable</li>
@@ -1250,7 +1250,7 @@
       <pre><code class="php" data-trim data-noescape data-line-numbers>
         class CompiledItems {
 
-            protected $items = [
+            protected const ITEMS = [
                 'thing1' => [
                     'color' => 'blue',
                     'size' => 5,
@@ -1262,7 +1262,7 @@
             ];
 
             public function getItem(string $name) {
-                return new Item($this->items[$name]);
+                return new Item(static::ITEMS[$name]);
             }
         }
       </code></pre>
@@ -1285,7 +1285,7 @@
       <p>Idea to Cloud Hosting</p>
       <p>Stalk us at <a href="http://twitter.com/Platformsh">@PlatformSH</a></p>
     </section>
-
+  </div>
 </div>
 
 <script src="js/reveal.js"></script>
