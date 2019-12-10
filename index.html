@@ -109,15 +109,12 @@
         </ul>
       </section>
       <section>
-        <!-- picture of linear array -->
-      </section>
-      <section>
         <h3>PHP has associative arrays</h3>
         <ul>
           <li>Arbitrary key-value index</li>
           <li class="fragment">"Dictionary"/"Map"</li>
           <li class="fragment">Numeric arrays via a hack</li>
-          <li class="fragment">No type guaratees (on value or key)</li>
+          <li class="fragment">No type guarantees (on value or key)</li>
         </ul>
       </section>
       <section>
@@ -125,6 +122,7 @@
           $a[] = 'A';
           $a[] = 'B';
           print_r($a);
+
           unset($a[1]);
           $a[] = 'C';
           print_r($a);
@@ -369,7 +367,7 @@
         </aside>
       </section>
       <section>
-        <h3>Can't touch this</h3>
+        <h3>Can't touch <code>$this</code></h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           class ImmutableTypedSequence implements IteratorAggregate, Countable {
               // Same as TypedSequence, but...
@@ -554,7 +552,7 @@
       <section>
         <div class="layout-stacked" style="height: 650px">
           <h3>Do you care about the type of the objects?</h3>
-          <p class="fragment oversize"><code>FooList implements \Traversable</code></p>
+          <p class="fragment oversize"><code>ProductList implements \Traversable</code></p>
         </div>
         <aside class="notes">
           <ul>
@@ -632,7 +630,7 @@
         </aside>
       </section>
       <section>
-        <h3>Tukio (PSR-14 reference implementation)</h3>
+        <h3><a href="https://github.com/Crell/Tukio">Tukio</a> (PSR-14 reference implementation)</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           class CallbackProvider implements ListenerProviderInterface {
               // ...
@@ -979,7 +977,6 @@
         </code></pre>
         <aside class="notes">
           <ul>
-            <li>ArrayAccess is slower than method call</li>
             <li>Configure this in your container</li>
             <li>Type checked throughout, so can't go wrong.</li>
           </ul>
@@ -1002,7 +999,7 @@
               'id' => 345,
               'total' => 100.45,
               'skus' => [ 123, '5B3', '987'],
-             'canceled' => false,
+              'canceled' => false,
               'usr' => 8,
           ];
         </code></pre>
@@ -1081,9 +1078,9 @@
               public string $color = '#000';
               public int $fontSize = 14;
               public string $layout;
-        }
+          }
 
-        function formatProduct(Product $p, FormatterOptions $options) : string {...}
+          function formatProduct(Product $p, FormatterOptions $options) : string {...}
         </code></pre>
         <aside class="notes">
           <ul>
@@ -1237,15 +1234,16 @@
       </section>
     </section>
     <section>
-      <p class="oversize"><q>So can you <em>ever</em> use an array?</q></p>
-      <ul>
-        <li class="fragment">Internal implementation detail</li>
-        <li class="fragment">Array literal for iterable</li>
-        <li class="fragment">Callables (<code>[$obj, 'method']</code>)</li>
-        <li class="fragment">Compiled code</li>
-      </ul>
-    </section>
-    <section>
+      <section>
+        <p class="oversize"><q>So can you <em>ever</em> use an array?</q></p>
+        <ul>
+          <li class="fragment">Internal implementation detail</li>
+          <li class="fragment">Array literal for iterable</li>
+          <li class="fragment">Callables (<code>[$obj, 'method']</code>)</li>
+          <li class="fragment">Generated code</li>
+        </ul>
+      </section>
+      <section>
       <pre><code class="php" data-trim data-noescape data-line-numbers>
         class CompiledItems {
 
@@ -1265,13 +1263,14 @@
             }
         }
       </code></pre>
-      <aside class="notes">
-        <ul>
-          <li>Embedded into shared memory, not process memory</li>
-          <li>More efficient if you just lookup rather than copy into memory</li>
-          <li>Use objects to build the data that will be serialized that way</li>
-        </ul>
-      </aside>
+        <aside class="notes">
+          <ul>
+            <li>Embedded into shared memory, not process memory</li>
+            <li>More efficient if you just lookup rather than copy into memory</li>
+            <li>Use objects to build the data that will be serialized that way</li>
+          </ul>
+        </aside>
+      </section>
     </section>
     <section>
       <h3>So really, Never* Use Arrays</h3>
