@@ -976,7 +976,7 @@
         </code></pre>
         <pre class="fragment"><code class="php" data-trim data-noescape data-line-numbers>
           $builder = $builders->lookup($req->getHeaderLine('Accept'));
-          $output = ->buildOutput($stuff);
+          $output = $builder->buildOutput($stuff);
         </code></pre>
         <aside class="notes">
           <ul>
@@ -988,8 +988,179 @@
       </section>
     </section>
     <section>
-      <h2>Anonymous structs</h2>
+      <section>
+        <h2>Anonymous structs</h2>
+        <aside class="notes">
+          <ul>
+            <li>When the keys are known and fixed at dev time</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h2>Anonymous structs</h2>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          $order = [
+              'id' => 345,
+              'total' => 100.45,
+              'skus' => [ 123, '5B3', '987'],
+             'canceled' => false,
+              'usr' => 8,
+          ];
+        </code></pre>
+        <ul style="margin-top: 1em;">
+          <li class="fragment">Is canceled spelled right?</li>
+          <li class="fragment">Is usr correct or a typo?</li>
+          <li class="fragment">Is user an ID or User object?</li>
+          <li class="fragment">Are skus numeric or strings?</li>
+          <li class="fragment">Can skus be a single value?</li>
+          <li class="fragment">Are there other properties?</li>
+          <li class="fragment">What currency is total in?</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Named structs</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+        class Order {
+            public string $id;
+            public float $total;
+            public bool $cancelled = false;
+            public User $user;
+            public array $skus = [];
+        }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Oh, ID is a string, not an integer.</li>
+            <li>Oh, user is an object. We were wrong before.</li>
+            <li>UK spelling of "cancelled".</li>
+            <li>Not 100% better, but 80%.</li>
+            <li>Could use a list object for $skus.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3><code>$options</code> is a code smell</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          function formatProduct(Product $product, array $options) : string {
+            // ...
+          }
+        </code></pre>
+        <ul style="margin-top: 1em;">
+          <li class="fragment">What are the values for <code>$options</code>?</li>
+          <li class="fragment">Which are required</li>
+          <li class="fragment">How are they spelled</li>
+          <li class="fragment">What are their legal types? How strict?</li>
+        </ul>
+        <p class="fragment oversize">¯\_(ツ)_/¯</p>
+      </section>
+      <section>
+        <h3>So, docs?</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          /**
+           * Formats a product.
+           *
+           * @param Product $product
+           * @param array $options
+           *   - label: The label to apply to the product.
+           *   - bgcolor: A color code for the background.
+           *   - color: A foreground color.
+           *   - font-size: The size in points.
+           *   - layout: The template to use.
+           *
+           * @return string
+           */
+          function formatProduct(Product $product, array $options) : string { ... }
+        </code></pre>
+        <p class="fragment oversize" style="margin-top: 1em;"><q>But good code is self documenting!</q></p>
+      </section>
+      <section>
+        <h3>Objects are self-documenting</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class FormatterOptions {
+              public string $label = 'Your product';
+              public string $bgcolor = '#FFF';
+              public string $color = '#000';
+              public int $fontSize = 14;
+              public string $layout;
+        }
+
+        function formatProduct(Product $p, FormatterOptions $options) : string {...}
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Know the properties</li>
+            <li>Know the types</li>
+            <li>Know defaults</li>
+            <li>layout is required, others optional</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Objects have methods</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+        class FormatterOptions {
+            public string $label = 'Your product';
+            public string $bgcolor = '#FFF';
+            public string $color = '#000';
+            public int $fontSize = 14;
+            public string $layout;
+
+            public static function forLayout(string $layout) { ... }
+
+            public function darkMode(bool $dark) : self {
+                $this->bgcolor = $dark ? '#000' : '#FFF';
+                $this->color  = $dark ? '#FFF' : '#000';
+                return $this;
+            }
+        }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Bake in more robust functionality</li>
+            <li>Robust domain model language</li>
+            <li>Should really turn it around at that point.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+        class ProductFormatter {
+            // ...
+
+            public function __construct(string $layout) {
+              $this->layout = $layout;
+            }
+
+            public function darkMode(bool $dark) : self { ... }
+
+            public function setColors(string $color, string $bgcolor) : self {
+                $this->color = $color;
+                $this->bgcolor = $bgcolor;
+                return $this;
+            }
+
+            public function setFontInPoints(int $size) : self {
+                $this->fontSize = $size;
+                return $this;
+            }
+
+            public function format(Product $product) : string { ... }
+        }
+        </code></pre>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+        $formatter = new ProductFormatter('standard');
+
+        $formatter->darkMode(true)->format($product);
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Build a do-er object, then use it.</li>
+            <li>Could spawn from another service if need dependencies</li>
+          </ul>
+        </aside>
+      </section>
     </section>
+
 
 
 
