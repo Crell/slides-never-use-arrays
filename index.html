@@ -68,6 +68,7 @@
             <li>PHP loves arrays</li>
             <li>The iconic PHP-ism</li>
             <li>Used everywhere</li>
+            <li>Over 80 array manipulation functions</li>
           </ul>
         </aside>
       </section>
@@ -83,7 +84,7 @@
       <section>
         <p class="oversize">They come with an <code>array</code> of problems.</p>
         <ul>
-          <li>Inconsistent behavior</li>
+          <li class="fragment">Inconsistent behavior</li>
           <li class="fragment">No type safety</li>
           <li class="fragment">No error handling</li>
           <li class="fragment">Poor performance</li>
@@ -91,6 +92,7 @@
         </ul>
         <aside class="notes">
           <ul>
+            <li>Type safety: Everything in the array is of a known same type</li>
             <li>Need to address the elephant in the room...</li>
           </ul>
         </aside>
@@ -102,7 +104,7 @@
       <section>
         <h2>What is in array?</h2>
         <ul>
-          <li>ordered sequence</li>
+          <li class="fragment">ordered sequence</li>
           <li class="fragment">of values</li>
           <li class="fragment">of the same type</li>
           <li class="fragment">identified by their offset</li>
@@ -111,20 +113,17 @@
       <section>
         <h3>PHP has associative arrays</h3>
         <ul>
-          <li>Arbitrary key-value index</li>
+          <li class="fragment">Arbitrary key-value index</li>
           <li class="fragment">"Dictionary"/"Map"</li>
           <li class="fragment">Numeric arrays via a hack</li>
           <li class="fragment">No type guarantees (on value or key)</li>
         </ul>
       </section>
       <section>
+        <h3>Arrays are a hack</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           $a[] = 'A';
           $a[] = 'B';
-          print_r($a);
-
-          unset($a[1]);
-          $a[] = 'C';
           print_r($a);
         </code></pre>
         <pre class="fragment"><code class="php" data-trim data-noescape>
@@ -133,6 +132,13 @@
               [0] => A
               [1] => B
           )
+        </code></pre>
+        <pre class="fragment"><code class="php" data-trim data-noescape>
+          unset($a[1]);
+          $a[] = 'C';
+          print_r($a);
+        </code></pre>
+        <pre class="fragment"><code class="php" data-trim data-noescape>
           Array
           (
               [0] => A
@@ -146,6 +152,7 @@
         </aside>
       </section>
       <section>
+        <h3>Arrays are a buggy hack</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           for ($i = 0; $i < count($a); ++$i) {
             print $a[$i];
@@ -160,6 +167,7 @@
         </aside>
       </section>
       <section data-transition="slide-in none-out">
+        <h3>What's wrong with this picture?</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           protected function expandArguments(&$query, &$args) {
               foreach ($args as $key => $data) {
@@ -181,6 +189,7 @@
         </code></pre>
       </section>
       <section data-transition="none">
+        <h3>Hey, look, an SQL injection!</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers="6,7,11">
           protected function expandArguments(&$query, &$args) {
               foreach ($args as $key => $data) {
@@ -207,6 +216,7 @@
         </aside>
       </section>
       <section data-transition="none-in slide-out">
+        <h3>Stupid simple fix</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers="6">
           protected function expandArguments(&$query, &$args) {
               foreach ($args as $key => $data) {
@@ -361,6 +371,7 @@
         <p class="fragment challenge-a"><q>Sigh.</q></p>
         <aside class="notes">
           <ul>
+            <li>Handle: Object in mem sep from the value that refers to it</li>
             <li>Objects pass in a way that makes them modifiable</li>
             <li>Bad.  But we can fix that ourselves.</li>
           </ul>
@@ -684,20 +695,20 @@
       </section>
       <section>
         <div class="layout-stacked" style="height: 600px">
-          <h3><q>But what about <code>array_*</code> methods?</q></h3>
+          <h3><q>But what about <code>array_*</code> functions?</q></h3>
           <p class="oversize fragment"><q>What about them?</q></p>
         </div>
       </section>
       <section>
-        <h3><code>array_*</code> methods</h3>
+        <h3><code>array_*</code> functions</h3>
         <ul>
-          <li class="fragment">Internal implementation detail</li>
           <li class="fragment">Rarely used</li>
+          <li class="fragment">Internal implementation detail</li>
           <li class="fragment">Easy to reimplement</li>
         </ul>
       </section>
       <section>
-        <h3>The big 3</h3>
+        <h3>The most common</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           function iterable_map(iterable $list, callable $operation) : iterable {
             foreach ($list as $k => $v) {
@@ -711,13 +722,6 @@
                 yield $k => $v;
               }
             }
-          }
-
-          function iterable_reduce(iterable $list, callable $reducer, $acc) {
-            foreach ($list as $v) {
-              $acc = $reducer($acc, $v);
-            }
-            return $acc;
           }
         </code></pre>
         <aside class="notes">
@@ -813,7 +817,7 @@
             <li>map() gives new collection that will filter when iterated</li>
             <li>toArray() can't just iterator_to_array() as keys will collide.</li>
             <li>This streams values out individually, ignores keys.</li>
-            <li>filter()/reduce() left as exercise for the reader.</li>
+            <li>filter() left as exercise for the reader.</li>
           </ul>
         </aside>
       </section>
@@ -866,6 +870,7 @@
         </ul>
       </section>
       <section>
+        <h3>A common pattern</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           $builders = [];
           foreach (getRegisteredBuilderPlugins() as $builder) {
@@ -910,6 +915,7 @@
         </code></pre>
       </section>
       <section>
+        <h3>Error handling is internalized</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           $builders = Lookup::forType(OutputBuilder::class, new DefaultBuilder());
 
@@ -960,8 +966,8 @@
               public function __construct(BuilderProvider $p, $defaultFmt = '') {...}
 
               protected function buildLookup() {
-                  foreach (getRegisteredBuilderPlugins() as $builder) {
-                      $this->builders[$builder->format()] = $builder;
+                  foreach ($this->provider->getRegisteredBuilderPlugins() as $b) {
+                      $this->builders[$b->format()] = $b;
                   }
               }
 
@@ -1018,7 +1024,7 @@
         <pre><code class="php" data-trim data-noescape data-line-numbers>
         class Order {
             public string $id;
-            public float $total;
+            public Money $total;
             public bool $cancelled = false;
             public User $user;
             public array $skus = [];
@@ -1028,6 +1034,7 @@
           <ul>
             <li>Oh, ID is a string, not an integer.</li>
             <li>Oh, user is an object. We were wrong before.</li>
+            <li>Oh, money is a proper value object, too.</li>
             <li>UK spelling of "cancelled".</li>
             <li>Not 100% better, but 80%.</li>
             <li>Could use a list object for $skus.</li>
@@ -1058,6 +1065,7 @@
            * @param Product $product
            * @param array $options
            *   - label: The label to apply to the product.
+           *   - bgcolor: A color code for the background.
            *   - bgcolor: A color code for the background.
            *   - color: A foreground color.
            *   - font-size: The size in points.
@@ -1119,6 +1127,7 @@
         </aside>
       </section>
       <section>
+        <h3>Turn it around</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
         class ProductFormatter {
             // ...
@@ -1143,11 +1152,22 @@
             public function format(Product $product) : string { ... }
         }
         </code></pre>
+      </section>
+      <section>
+        <h3>Easy to use</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
         $formatter = new ProductFormatter('standard');
 
         $formatter->darkMode(true)->format($product);
         </code></pre>
+        <div class="fragment" style="margin-top: 5em;">
+          <h3>If has dependencies</h3>
+          <pre><code class="php" data-trim data-noescape data-line-numbers>
+        $formatter = $themeSystem->getFormatter('standard');
+
+        $formatter->darkMode(true)->format($product);
+        </code></pre>
+        </div>
         <aside class="notes">
           <ul>
             <li>Build a do-er object, then use it.</li>
@@ -1231,6 +1251,7 @@
           </blockquote>
           <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
         </div>
+        <p style="margin-top: 1em;">Source: <a href="https://steemit.com/php/@crell/php-use-associative-arrays-basically-never">"Use associative arrays basically never"</a></p>
       </section>
     </section>
     <section>
@@ -1244,25 +1265,26 @@
         </ul>
       </section>
       <section>
-      <pre><code class="php" data-trim data-noescape data-line-numbers>
-        class CompiledItems {
+        <h3>This is actually more efficient (sometimes)</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class CompiledItems {
 
-            protected const ITEMS = [
-                'thing1' => [
-                    'color' => 'blue',
-                    'size' => 5,
-                ],
-                'thing2' => [
-                    'color' => 'green',
-                    'size' => 7,
-                ],
-            ];
+              protected const ITEMS = [
+                  'thing1' => [
+                      'color' => 'blue',
+                      'size' => 5,
+                  ],
+                  'thing2' => [
+                      'color' => 'green',
+                      'size' => 7,
+                  ],
+              ];
 
-            public function getItem(string $name) {
-                return new Item(static::ITEMS[$name]);
-            }
-        }
-      </code></pre>
+              public function getItem(string $name) {
+                  return new Item(static::ITEMS[$name]);
+              }
+          }
+        </code></pre>
         <aside class="notes">
           <ul>
             <li>Embedded into shared memory, not process memory</li>
@@ -1274,6 +1296,7 @@
     </section>
     <section>
       <h3>So really, Never* Use Arrays</h3>
+      <p class="fragment oversize">(in public)</p>
     </section>
 
     <section id="final">
