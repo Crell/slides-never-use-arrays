@@ -348,7 +348,7 @@
                   if (! $newval instanceof $this->type) {
                       throw new \TypeError(...);
                   }
-                  $this->values = $newval;
+                  $this->values[] = $newval;
                   return $this;
               }
           }
