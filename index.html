@@ -530,6 +530,36 @@
         </aside>
       </section>
       <section>
+        <h3>Purpose-built ordering</h3>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+          class PointSet implements IteratorAggregate {
+              protected array $values = [];
+
+              public function has(Point $val) : bool {
+                  return array_search($val, $this->values, true) !== false;
+              }
+
+              public function add(Point $newval) : self {
+                  $new = clone($this);
+                  $new->values = [...$values, $newval];
+                  return $new;
+              }
+
+              public function remove(Point $oldval) : self { ... }
+
+              public function compare(Point $, Point $b) : int {
+                  return [$a->x, $a->y] <=> [$b->x, $b->y];
+              }
+
+              public function getIterator() {
+                  usort($this->values, [$this 'compare']);
+                  return new ArrayIterator($this->values);
+              }
+          }
+        </code></pre>
+
+      </section>
+      <section>
         <h3>What have we gained?</h3>
         <ul>
           <li class="fragment">Type-safe lists</li>
@@ -740,17 +770,17 @@
 
               protected function __construct(){}
 
+              public static function fromGenerator(callable $callback) : self {
+                  $new = new static();
+                  $new->valuesGenerator = $callback;
+                  return $new;
+              }
+
               public static function fromIterable(iterable $values = null) {
                   $values ??= [];
                   return static::fromGenerator(function () use ($values) {
                       yield from $values;
                   });
-              }
-
-              public static function fromGenerator(callable $callback) : self {
-                  $new = new static();
-                  $new->valuesGenerator = $callback;
-                  return $new;
               }
 
               public function getIterator() : iterable {
