@@ -282,7 +282,7 @@
           class TypedArray extends \ArrayObject {
               protected $type;
 
-              public static function forType(string $type) : self {
+              public static function forType(string $type): self {
                   $ret = new static();
                   $ret->type = $type;
                   return $ret;
@@ -333,18 +333,18 @@
               protected string $type;
               protected array $values = [];
 
-              public static function forType(string $type) : self {...}
+              public static function forType(string $type): self {...}
               protected function __construct() {}
 
               public function getIterator() {
                   return new ArrayIterator($this->values);
               }
 
-              public function count() : int {
+              public function count(): int {
                   return count($this->values);
               }
 
-              public function add($newval) : self {
+              public function add($newval): self {
                   if (! $newval instanceof $this->type) {
                       throw new \TypeError(...);
                   }
@@ -383,7 +383,7 @@
           class ImmutableTypedSequence implements IteratorAggregate, Countable {
               // Same as TypedSequence, but...
 
-              public function add($newval) : self {
+              public function add($newval): self {
                   if (!$newval instanceof $this->type) { throw new \TypeError(...);}
 
                   $new = clone($this);
@@ -392,7 +392,7 @@
                   return $new;
               }
 
-              public function remove($val) : self {
+              public function remove($val): self {
                   if ($key = array_search($val, $this->values, true)) {
                       $values = $this->values;
                       unset($values[$key]);
@@ -418,14 +418,14 @@
           class PointSequence implements IteratorAggregate, Countable {
               // Same as before, but...
 
-              public function add(Point $newval) : self {
+              public function add(Point $newval): self {
                   $new = clone($this);
                   $values = array_merge($this->values, [$newval]);
                   $new->values = $values;
                   return $new;
               }
 
-              public function remove(Point $val) : self {
+              public function remove(Point $val): self {
                   if ($key = array_search($val, $this->values, true)) {
                       $values = $this->values;
                       unset($values[$key]);
@@ -449,11 +449,11 @@
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           class Set extends ImmutableTypedSequence {
 
-              public function has($val) : bool {
+              public function has($val): bool {
                   return array_search($val, $this->values, true) !== false;
               }
 
-              public function add($newval) : self {
+              public function add($newval): self {
                   return $this->has($newval) ? $this : parent::add($newval);
               }
           }
@@ -471,7 +471,7 @@
           class OrderedSet extends Set {
               protected $compare;
 
-              public static function forType(string $type, callable $compare = null) : self {
+              public static function forType(string $type, callable $compare = null): self {
                   $ret = new static();
                   $ret->type = $type;
                   $ret->compare = $compare;
@@ -535,19 +535,19 @@
           class PointSet implements IteratorAggregate {
               protected array $values = [];
 
-              public function has(Point $val) : bool {
+              public function has(Point $val): bool {
                   return array_search($val, $this->values, true) !== false;
               }
 
-              public function add(Point $newval) : self {
+              public function add(Point $newval): self {
                   $new = clone($this);
                   $new->values = [...$values, $newval];
                   return $new;
               }
 
-              public function remove(Point $oldval) : self { ... }
+              public function remove(Point $oldval): self { ... }
 
-              public function compare(Point $, Point $b) : int {
+              public function compare(Point $, Point $b): int {
                   return [$a->x, $a->y] <=> [$b->x, $b->y];
               }
 
@@ -635,7 +635,7 @@
              *   An iterable (array, iterator, or generator) of callables.  Each
              *   callable MUST be type-compatible with $event.
              */
-            public function getListenersForEvent(object $event) : iterable;
+            public function getListenersForEvent(object $event): iterable;
         }
         </code></pre>
         <aside class="notes">
@@ -740,13 +740,13 @@
       <section>
         <h3>The most common</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
-          function iterable_map(iterable $list, callable $operation) : iterable {
+          function iterable_map(iterable $list, callable $operation): iterable {
             foreach ($list as $k => $v) {
               yield $operation($k, $v);
             }
           }
 
-          function iterable_filter(iterable $list, callable $filter) : iterable {
+          function iterable_filter(iterable $list, callable $filter): iterable {
             foreach ($list as $k => $v) {
               if ($filter($v)) {
                 yield $k => $v;
@@ -770,7 +770,7 @@
 
               protected function __construct(){}
 
-              public static function fromGenerator(callable $callback) : self {
+              public static function fromGenerator(callable $callback): self {
                   $new = new static();
                   $new->valuesGenerator = $callback;
                   return $new;
@@ -783,7 +783,7 @@
                   });
               }
 
-              public function getIterator() : iterable {
+              public function getIterator(): iterable {
                   return ($this->valuesGenerator)();
               }
           }
@@ -800,7 +800,7 @@
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           class Collection implements \IteratorAggregate {
               // ...
-              public function append(iterable ...$collections) : self {
+              public function append(iterable ...$collections): self {
                   return static::fromGenerator(function() use ($collections) {
                       yield from ($this->valuesGenerator)();
                       foreach ($collections as $col) {
@@ -809,7 +809,7 @@
                   });
               }
 
-              public function add(...$items) : self {
+              public function add(...$items): self {
                   return $this->append($items);
               }
           }
@@ -826,7 +826,7 @@
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           class Collection implements \IteratorAggregate {
               // ...
-              public function map(callable $fn) : self {
+              public function map(callable $fn): self {
                   return static::fromGenerator(function () use ($fn) {
                       foreach (($this->valuesGenerator)() as $key => $val) {
                           yield $key => $fn($val);
@@ -834,7 +834,7 @@
                   });
               }
 
-              public function toArray() : array {
+              public function toArray(): array {
                   return iterator_to_array((function() {
                       foreach ($this as $value) {
                           yield $value;
@@ -924,7 +924,7 @@
               protected $values;
               protected $default;
 
-              public static function forType(string $type, $default = null) : self {
+              public static function forType(string $type, $default = null): self {
                   // Like we saw before, but also save $default.
               }
 
@@ -964,7 +964,7 @@
               protected $type;
               protected $values;
 
-              public static function forType(string $type) : self {
+              public static function forType(string $type): self {
                   // As before.
               }
 
@@ -1074,7 +1074,7 @@
       <section>
         <h3><code>$options</code> is a code smell</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
-          function formatProduct(Product $product, array $options) : string {
+          function formatProduct(Product $product, array $options): string {
             // ...
           }
         </code></pre>
@@ -1103,7 +1103,7 @@
            *
            * @return string
            */
-          function formatProduct(Product $product, array $options) : string { ... }
+          function formatProduct(Product $product, array $options): string { ... }
         </code></pre>
         <p class="fragment oversize" style="margin-top: 1em;"><q>But good code is self documenting!</q></p>
       </section>
@@ -1118,7 +1118,7 @@
               public string $layout;
           }
 
-          function formatProduct(Product $p, FormatterOptions $options) : string {...}
+          function formatProduct(Product $p, FormatterOptions $options): string {...}
         </code></pre>
         <aside class="notes">
           <ul>
@@ -1141,7 +1141,7 @@
 
             public static function forLayout(string $layout) { ... }
 
-            public function darkMode(bool $dark) : self {
+            public function darkMode(bool $dark): self {
                 $this->bgcolor = $dark ? '#000' : '#FFF';
                 $this->color  = $dark ? '#FFF' : '#000';
                 return $this;
@@ -1166,20 +1166,20 @@
               $this->layout = $layout;
             }
 
-            public function darkMode(bool $dark) : self { ... }
+            public function darkMode(bool $dark): self { ... }
 
-            public function setColors(string $color, string $bgcolor) : self {
+            public function setColors(string $color, string $bgcolor): self {
                 $this->color = $color;
                 $this->bgcolor = $bgcolor;
                 return $this;
             }
 
-            public function setFontInPoints(int $size) : self {
+            public function setFontInPoints(int $size): self {
                 $this->fontSize = $size;
                 return $this;
             }
 
-            public function format(Product $product) : string { ... }
+            public function format(Product $product): string { ... }
         }
         </code></pre>
       </section>
