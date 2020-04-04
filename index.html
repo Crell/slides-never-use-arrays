@@ -995,13 +995,13 @@
 
               public function __construct(BuilderProvider $p, $defaultFmt = '') {...}
 
-              protected function buildLookup() {
+              protected function buildLookup(): void {
                   foreach ($this->provider->getRegisteredBuilderPlugins() as $b) {
                       $this->builders[$b->format()] = $b;
                   }
               }
 
-              public function lookup(string $key) {
+              public function lookup(string $key): OutputBuilder {
                   if (!$this->builders) $this->buildLookup();
                   return $this->values[$key] ?? $this->values[$this->defaultFmt];
               }
