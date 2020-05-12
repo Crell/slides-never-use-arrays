@@ -118,6 +118,11 @@
           <li class="fragment">Numeric arrays via a hack</li>
           <li class="fragment">No type guarantees (on value or key)</li>
         </ul>
+        <aside class="notes">
+          <ul>
+            <li>float key rounds down and becomes int</li>
+          </ul>
+        </aside>
       </section>
       <section>
         <h3>Arrays are a hack</h3>
@@ -387,7 +392,7 @@
                   if (!$newval instanceof $this->type) { throw new \TypeError(...);}
 
                   $new = clone($this);
-                  $values = array_merge($this->values, [$newval]);
+                  $values = [...$this->values, $newval];
                   $new->values = $values;
                   return $new;
               }
@@ -420,7 +425,7 @@
 
               public function add(Point $newval): self {
                   $new = clone($this);
-                  $values = array_merge($this->values, [$newval]);
+                  $values = [...$this->values, $newval];
                   $new->values = $values;
                   return $new;
               }
@@ -1040,7 +1045,7 @@
           ];
         </code></pre>
         <ul style="margin-top: 1em;">
-          <li class="fragment">Is canceled spelled right?</li>
+          <li class="fragment">Is cancelled spelled right?</li>
           <li class="fragment">Is usr correct or a typo?</li>
           <li class="fragment">Is user an ID or User object?</li>
           <li class="fragment">Are skus numeric or strings?</li>
@@ -1226,7 +1231,7 @@
       <section>
         <h3>Benchmarks, yo</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
-          const TEST_SIZE = 1000000;
+          const TEST_SIZE = 1_000_000;
 
           $list = [];
           $start = $stop = 0;
