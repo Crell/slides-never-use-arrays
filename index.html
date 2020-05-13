@@ -557,7 +557,7 @@
               }
 
               public function getIterator() {
-                  usort($this->values, [$this 'compare']);
+                  usort($this->values, [$this, 'compare']);
                   return new ArrayIterator($this->values);
               }
           }
