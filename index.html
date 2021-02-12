@@ -809,17 +809,13 @@
               }
 
               public function toArray(): array {
-                  return iterator_to_array((function() {
-                      foreach ($this as $value) {
-                          yield $value;
-                      }
-                  })());
+                  return iterator_to_array($this, false);
               }
         </code></pre>
         <aside class="notes">
           <ul>
             <li>map() gives new collection that will filter when iterated</li>
-            <li>toArray() can't just iterator_to_array() as keys will collide.</li>
+            <li>iterator_to_array false param ignores keys and resequences.</li>
             <li>This streams values out individually, ignores keys.</li>
             <li>filter() left as exercise for the reader.</li>
           </ul>
