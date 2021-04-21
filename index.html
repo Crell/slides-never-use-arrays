@@ -1084,12 +1084,12 @@
            *
            * @param Product $product
            * @param array $options
+           *   - layout: The template to use.
            *   - label: The label to apply to the product.
            *   - bgcolor: A color code for the background.
            *   - bgcolor: A color code for the background.
            *   - color: A foreground color.
            *   - font-size: The size in points.
-           *   - layout: The template to use.
            *
            * @return string
            */
@@ -1102,11 +1102,11 @@
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           class FormatterOptions {
               public function __construct(
+                  public string $layout,
                   public string $label = 'Your product',
                   public string $bgcolor = '#FFF',
                   public string $color = '#000',
                   public int $fontSize = 14,
-                  public string $layout,
               ) {}
           }
 
@@ -1125,11 +1125,11 @@
         <h3>Objects have methods</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
         class FormatterOptions {
+            public string $layout;
             public string $label = 'Your product';
             public string $bgcolor = '#FFF';
             public string $color = '#000';
             public int $fontSize = 14;
-            public string $layout;
 
             // Use named args for additional properties to set.
             public static function forLayout(string $layout, mixed ...$extra) { ... }
@@ -1155,9 +1155,7 @@
         class ProductFormatter {
             // ...
 
-            public function __construct(string $layout) {
-              $this->layout = $layout;
-            }
+            public function __construct(protected string $layout) {}
 
             public function darkMode(bool $dark): static { ... }
 
@@ -1247,6 +1245,7 @@
             <li>Same thing for stdClass, public props, private props with methods, anon class</li>
             <li>Multiple runs, averaged, etc.</li>
             <li>Goal is to access values a zillion times</li>
+            <li>Run on PHP 7.2</li>
           </ul>
         </aside>
       </section>
