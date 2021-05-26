@@ -1125,11 +1125,13 @@
         <h3>Objects have methods</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
         class FormatterOptions {
-            public string $layout;
-            public string $label = 'Your product';
-            public string $bgcolor = '#FFF';
-            public string $color = '#000';
-            public int $fontSize = 14;
+              public function __construct(
+                  public string $layout,
+                  public string $label = 'Your product',
+                  public string $bgcolor = '#FFF',
+                  public string $color = '#000',
+                  public int $fontSize = 14,
+              ) {}
 
             // Use named args for additional properties to set.
             public static function forLayout(string $layout, mixed ...$extra) { ... }
