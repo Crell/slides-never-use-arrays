@@ -1,0 +1,4 @@
+name: slides-never-use-arrays
+recipe: lamp
+config:
+  webroot: .
