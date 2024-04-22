@@ -30,8 +30,8 @@
 <body class="skin-blue">
 <div class="reveal">
   <footer>
-    <img src="assets/typo3-logo.svg" alt="TYPO3" data-credit="https://en.wikipedia.org/wiki/File:Logo_TYPO3.svg" />
-    <span class="name">@Crell</span>
+    <img src="assets/lz-logo-black.svg" alt="LegalZoom" />
+    <span class="name">@Crell@phpc.social</span>
   </footer>
 	<div class="slides">
     <section class="title">
@@ -40,16 +40,16 @@
 
     <section id="presenter">
       <h2>Larry Garfield</h2>
-      <h2><a href="http://twitter.com/Crell">@Crell</a></h2>
+      <h2><a href="https://phpc.social/@Crell">@Crell@phpc.social</a></h2>
 
       <div class="layout-col vcentered">
         <a href="http://bit.ly/php80"><img src="assets/exploring-php80.png" width="175px;" alt="Cover of Exploring PHP 8.0" /></a>
         <a href="https://bit.ly/fn-php"><img src="assets/thinking-functionally.png" width="175px;" alt="Cover of Thinking Functionally in PHP" /></a>
 
         <ul style="text-wrap: none">
-          <li style="margin-top: 1em;">Staff Engineer for <a href="https://www.typo3.com/">TYPO3</a></li>
+          <li style="margin-top: 1em;">Staff Engineer for <a href="https://www.typo3.com/">LegalZoom</a></li>
           <li style="margin-top: 1em;">PHP-FIG Core Committee</li>
-          <li style="margin-top: 1em;">Editor of other people's PHP core RFCs</li>
+          <li style="margin-top: 1em;">General purpose pedant</li>
           <li style="margin-top: 1em;"><a href="http://bit.ly/php80"><em>Exploring PHP 8.0</em></a></li>
           <li style="margin-top: 1em;"><a href="https://bit.ly/fn-php"><em>Thinking Functionally in PHP</em></a></li>
         </ul>
@@ -684,11 +684,10 @@
         <h3>Trivial to concatenate</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
           class AggregateProvider implements ListenerProviderInterface {
-              /** @var array */
+              /** @var ListenerProviderInterface[] */
               protected $providers = [];
 
               public function getListenersForEvent(object $event): iterable {
-                  /** @var ListenerProviderInterface $provider */
                   foreach ($this->providers as $provider) {
                       yield from $provider->getListenersForEvent($event);
                   }
@@ -1028,17 +1027,6 @@
       <section>
         <h3>Named structs</h3>
         <pre><code class="php" data-trim data-noescape data-line-numbers>
-        class Order {
-            public string $id;
-            public Money $total;
-            public User $user;
-            public bool $cancelled = false;
-            public array $skus = [];
-        }
-        </code></pre>
-        <div class="fragment">
-          <h3>In PHP 8.0</h3>
-          <pre><code class="php" data-trim data-noescape data-line-numbers>
           class Order {
               public function __construct(
                 public string $id,
@@ -1048,8 +1036,8 @@
                 public array $skus = [],
               ) {}
           }
-          </code></pre>
-        </div>
+        </code></pre>
+        <p class="fragment">Can also make <code>readonly</code>.</p>
         <aside class="notes">
           <ul>
             <li>Oh, ID is a string, not an integer.</li>
@@ -1203,6 +1191,8 @@
         <ul>
           <li class="fragment">Private object => Public properties</li>
           <li class="fragment">Public API => protected properties with meaningful methods</li>
+          <li class="fragment">PHP >= 8.1 => public readonly properties a-OK</li>
+          <li class="fragment">PHP >= 8.4 => <em>Property hooks!</em> Public all the things!</li>
         </ul>
       </section>
     </section>
@@ -1268,13 +1258,10 @@
         <p class="fragment"><img src="assets/mind-blown.gif" alt="Mind blown" width="400px" style="margin-top: 1em" /></p>
       </section>
       <section>
-        <div style="display: flex; align-items: center; justify-content: center;">
-          <blockquote class="twitter-tweet" data-lang="en" data-dnt="true">
-            <p lang="en" dir="ltr">Replaced all object-like arrays with classes where they are used thousands of times.<br><br>Memory usage reduced by 58% (from 12Gb to 5Gb).<br><br>Please, read this article by <a href="https://twitter.com/Crell?ref_src=twsrc%5Etfw">@Crell</a>
-              <a href="https://t.co/cHb3agX18R">https://t.co/cHb3agX18R</a> to understand why you have to prefer classes. <a href="https://t.co/ipuqmdpnWB">pic.twitter.com/ipuqmdpnWB</a></p>&mdash; Maks Rafalko (@maks_rafalko) <a href="https://twitter.com/maks_rafalko/status/1141822788124196867?ref_src=twsrc%5Etfw">June 20, 2019</a>
-          </blockquote>
-          <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-        </div>
+        <img src="assets/twitter-array-memory.png"
+             alt="A tweet, stating: Replaced all object-like arrays with classes where they are used thousands of times. Memory usage reduced by 58% (from 12GB to 5 GB)."
+             data-source="https://twitter.com/maks_rafalko/status/1141822788124196867"
+        >
         <p style="margin-top: 1em;">Source: <a href="https://hive.blog/php/@crell/php-use-associative-arrays-basically-never">"Use associative arrays basically never"</a></p>
       </section>
     </section>
