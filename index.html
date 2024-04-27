@@ -882,7 +882,7 @@
           }
           // ...
 
-          $output = $lookup[$request->getHeaderLine('Accept')]->buildOutput($stuff);
+          $output = $builders[$request->getHeaderLine('Accept')]->buildOutput($stuff);
         </code></pre>
         <ul class="fragment" style="margin-top: 1em;">
           <li>Error handling?</li>
@@ -928,7 +928,7 @@
           }
           // ...
 
-          $output = $lookup[$request->getHeaderLine('Accept')]->buildOutput($stuff);
+          $output = $builders[$request->getHeaderLine('Accept')]->buildOutput($stuff);
         </code></pre>
       </section>
       <section>
